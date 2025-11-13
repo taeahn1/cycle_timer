@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cycle Timer - Recall/Connect/Transform</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --font-color: white;
+      --recall-color: #f43f5e;
+      --connect-color: #60a5fa;
+      --transform-color: #4ade80;
+    }
+    body {
+      background-color: var(--bg-color);
+      color: var(--font-color);
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 1rem;
+    }
+    .container {
+      text-align: center;
+    }
+    .phase-label {
+      font-size: 3rem;
+      font-weight: bold;
+      margin-bottom: 2rem;
+      animation: fadeIn 0.5s ease-in;
+    }
+    .recall { color: var(--recall-color); }
+    .connect { color: var(--connect-color); }
+    .transform { color: var(--transform-color); }
+    
+    .timer {
+      font-size: 5rem;
+      font-weight: bold;
+      margin: 2rem 0;
+      font-variant-numeric: tabular-nums;
+    }
+    .session-info {
+      font-size: 1.5rem;
+      margin-top: 2rem;
+      opacity: 0.8;
+    }
+    .btn {
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 9999px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      margin: 0.5rem;
+      transition: all 0.3s ease;
+      color: white;
+    }
+    .start-btn { 
+      background-color: var(--transform-color); 
+    }
+    .start-btn:hover { 
+      background-color: #22c55e; 
+      transform: scale(1.05);
+    }
+    .stop-btn { 
+      background-color: var(--recall-color); 
+    }
+    .stop-btn:hover { 
+      background-color: #dc2626; 
+      transform: scale(1.05);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="phaseLabel" class="phase-label"></div>
+    <div id="timer" class="timer">--:--</div>
+    <div id="sessionInfo" class="session-info"></div>
+    <div id="controls">
+      <button id="startBtn" class="btn start-btn">▶ Start</button>
+      <button id="stopBtn" class="btn stop-btn" style="display:none;">⏹ Stop</button>
+    </div>
+  </div>
+
+  <script>
+    // Timer configuration
+    const PHASES = [
+      { name: 'RECALL', duration: 120, color: 'recall' },      // 2 minutes
+      { name: 'CONNECT', duration: 180, color: 'connect' },    // 3 minutes
+      { name: 'TRANSFORM', duration: 300, color: 'transform' } // 5 minutes
+    ];
+    
+    const SESSION_DURATION = 600; // 10 minutes total (2+3+5=10)
+    
+    // State
+    let currentPhaseIndex = 0;
+    let timeRemaining = 0;
+    let sessionCount = 0;
+    let isRunning = false;
+    let interval = null;
+    let sessionStartTime = 0;
+    let totalSessionTime = 0;
+    
+    // DOM elements
+    const phaseLabelEl = document.getElementById('phaseLabel');
+    const timerEl = document.getElementById('timer');
+    const sessionInfoEl = document.getElementById('sessionInfo');
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    
+    // Speech synthesis
+    function speak(text) {
+      if ('speechSynthesis' in window) {
+        speechSynthesis.cancel();
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.lang = 'en-US';
+        msg.pitch = 1;
+        msg.rate = 0.9;
+        msg.volume = 1;
+        speechSynthesis.speak(msg);
+      }
+    }
+    
+    // Format time as MM:SS
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${mins}:${String(secs).padStart(2, '0')}`;
+    }
+    
+    // Start a new phase
+    function startPhase(phaseIndex) {
+      currentPhaseIndex = phaseIndex;
+      const phase = PHASES[phaseIndex];
+      
+      timeRemaining = phase.duration;
+      
+      // Update UI
+      phaseLabelEl.textContent = phase.name;
+      phaseLabelEl.className = `phase-label ${phase.color}`;
+      
+      // Announce phase
+      speak(phase.name);
+    }
+    
+    // Start the timer
+    function startTimer() {
+      if (isRunning) return;
+      
+      isRunning = true;
+      sessionStartTime = Date.now();
+      sessionCount++;
+      
+      // Start with first phase
+      startPhase(0);
+      
+      // Update UI
+      startBtn.style.display = 'none';
+      stopBtn.style.display = 'inline';
+      updateDisplay();
+      
+      // Start countdown
+      interval = setInterval(() => {
+        timeRemaining--;
+        totalSessionTime++;
+        
+        // Check if phase is complete
+        if (timeRemaining <= 0) {
+          // Move to next phase
+          const nextPhaseIndex = (currentPhaseIndex + 1) % PHASES.length;
+          
+          // If we completed all phases (back to phase 0), this session is done
+          if (nextPhaseIndex === 0) {
+            // Session complete, start new session automatically
+            startPhase(0);
+          } else {
+            // Move to next phase in current session
+            startPhase(nextPhaseIndex);
+          }
+        }
+        
+        updateDisplay();
+      }, 1000);
+    }
+    
+    // Stop the timer
+    function stopTimer() {
+      if (!isRunning) return;
+      
+      isRunning = false;
+      clearInterval(interval);
+      
+      // Reset UI
+      startBtn.style.display = 'inline';
+      stopBtn.style.display = 'none';
+      
+      // Reset state
+      currentPhaseIndex = 0;
+      timeRemaining = 0;
+      totalSessionTime = 0;
+      
+      phaseLabelEl.textContent = '';
+      timerEl.textContent = '--:--';
+      updateDisplay();
+    }
+    
+    // Update display
+    function updateDisplay() {
+      // Update timer
+      if (isRunning) {
+        timerEl.textContent = formatTime(timeRemaining);
+        timerEl.className = timeRemaining <= 10 ? 'timer pulse' : 'timer';
+      }
+      
+      // Update session info
+      if (isRunning) {
+        const currentPhase = PHASES[currentPhaseIndex];
+        const cycleNumber = Math.floor(totalSessionTime / SESSION_DURATION) + 1;
+        sessionInfoEl.textContent = `Session ${sessionCount} • Cycle ${cycleNumber} • ${currentPhase.name}`;
+      } else {
+        sessionInfoEl.textContent = `Total Sessions: ${sessionCount}`;
+      }
+    }
+    
+    // Event listeners
+    startBtn.addEventListener('click', startTimer);
+    stopBtn.addEventListener('click', stopTimer);
+    
+    // Initialize display
+    updateDisplay();
+  </script>
+</body>
+</html>
