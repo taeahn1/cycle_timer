@@ -480,7 +480,10 @@
       <button id="startBoostBtn" class="btn boost-btn">▶ 뇌혈류부스트 시작</button>
       <button id="startInsightBtn" class="btn insight-btn">▶ 인사이트 시작</button>
     </div>
-    <button class="history-btn" id="historyBtn">📅 History</button>
+    <div style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.5rem;">
+      <button class="history-btn" id="historyBtn">📅 History</button>
+      <button class="history-btn" id="exportBtn">⬇ Export</button>
+    </div>
   </div>
 
   <!-- ── SESSION SCREEN ── -->
@@ -537,6 +540,7 @@
     let timeLeft = 0;
     let running = false;
     let ticker = null;
+    let sessionStartAt = null; // KST ISO string
     // log = [{type:'boost', count:2}, {type:'insight', count:1}, ...]
     let log = [];
 
@@ -550,17 +554,27 @@
     const stopBtn = document.getElementById('stopBtn');
     const switchBtn = document.getElementById('switchBtn');
 
-    // ── Storage ──────────────────────────────────────
-    function todayKey() {
-      const d = new Date();
-      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    // ── KST helpers ──────────────────────────────────
+    function nowKST() {
+      // Returns ISO string in KST (UTC+9)
+      const now = new Date();
+      const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+      return kst.toISOString().slice(0, 19).replace('T', ' ') + ' KST';
     }
+    function todayKey() {
+      const now = new Date();
+      const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+      return kst.toISOString().slice(0, 10); // YYYY-MM-DD in KST
+    }
+
+    // ── Storage ──────────────────────────────────────
     function loadAll() { try { return JSON.parse(localStorage.getItem(STORE)) || {}; } catch { return {}; } }
     function saveAll(h) { localStorage.setItem(STORE, JSON.stringify(h)); }
     function getToday() { const d = loadAll()[todayKey()] || {}; return { boost: d.boost || 0, insight: d.insight || 0 }; }
     function addCycle(type) {
       const h = loadAll(), k = todayKey();
-      if (!h[k]) h[k] = { boost: 0, insight: 0 };
+      if (!h[k]) h[k] = { boost: 0, insight: 0, sessions: [] };
+      if (!h[k].sessions) h[k].sessions = [];
       h[k][type]++;
       saveAll(h);
       refreshMain();
@@ -631,6 +645,7 @@
     function startSession(type) {
       curType = type;
       running = true;
+      sessionStartAt = nowKST();
       log = [{ type, count: 0 }];
       mainScreen.style.display = 'none';
       sessionScreen.style.display = 'block';
@@ -672,10 +687,31 @@
     function stopSession() {
       running = false;
       clearInterval(ticker);
+      // Save session log to storage
+      const h = loadAll(), k = todayKey();
+      if (!h[k]) h[k] = { boost: 0, insight: 0, sessions: [] };
+      if (!h[k].sessions) h[k].sessions = [];
+      h[k].sessions.push({ startedAt: sessionStartAt, log: log.map(s => ({ ...s })) });
+      saveAll(h);
       sessionScreen.style.display = 'none';
       mainScreen.style.display = 'block';
       log = [];
       refreshMain();
+    }
+
+    // ── Export ───────────────────────────────────────
+    function exportData() {
+      const all = loadAll();
+      const json = JSON.stringify(all, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `cycle_timer_${todayKey()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     }
 
     // ── History modal ─────────────────────────────────
@@ -713,6 +749,7 @@
     stopBtn.addEventListener('click', stopSession);
     switchBtn.addEventListener('click', switchSession);
     document.getElementById('historyBtn').addEventListener('click', openHistory);
+    document.getElementById('exportBtn').addEventListener('click', exportData);
     document.getElementById('modalClose').addEventListener('click', () => document.getElementById('modalOverlay').classList.remove('open'));
     document.getElementById('modalOverlay').addEventListener('click', e => {
       if (e.target.id === 'modalOverlay') document.getElementById('modalOverlay').classList.remove('open');
