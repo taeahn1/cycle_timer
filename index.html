@@ -62,6 +62,20 @@
       font-size: 1.3rem;
     }
 
+    /* Session cycle label (shown while running) */
+    .session-cycle-label {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.05em;
+    }
+
+    .session-cycle-label span {
+      color: var(--recall-color);
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
     /* Phase label */
     .phase-label {
       font-size: 3rem;
@@ -308,14 +322,18 @@
   <div class="container">
     <div class="page-title">Cycles</div>
 
-    <!-- Today's count -->
+    <!-- Today's count (always visible) -->
     <div class="today-cycles">오늘 <span id="todayCount">0</span> 사이클</div>
 
     <!-- Phase label & Timer -->
     <div id="phaseLabel" class="phase-label"></div>
     <div id="timer" class="timer">--:--</div>
 
-    <!-- Cycle progress dots (max 10 visible) -->
+    <!-- Session cycle count (shown only while running) -->
+    <div id="sessionCycleLabel" class="session-cycle-label" style="display:none;">이번 세션 <span
+        id="sessionCycleCount">0</span> 사이클</div>
+
+    <!-- Cycle progress dots -->
     <div class="cycle-dots" id="cycleDots"></div>
 
     <!-- Controls -->
@@ -396,17 +414,31 @@
       todayCountEl.textContent = getTodayCount();
     }
 
-    // ── Dots (up to 10) ──────────────────────────────────────
+    // ── Dots ─────────────────────────────────────────────────
+    // While running: show this session's cycles
+    // While stopped: show today's total cycles
     function refreshDots() {
-      const total = getTodayCount();
-      const show = Math.min(total + 1, 12);   // show at least 1 (next) + done
-      cycleDotsEl.innerHTML = '';
-      for (let i = 0; i < show; i++) {
-        const dot = document.createElement('div');
-        dot.className = 'cycle-dot' + (i < total ? ' done' : (isRunning ? ' active' : ''));
-        cycleDotsEl.appendChild(dot);
+      if (isRunning) {
+        // Session view: completedCyclesThisRun done + 1 active
+        const done = completedCyclesThisRun;
+        const show = done + 1;
+        cycleDotsEl.innerHTML = '';
+        for (let i = 0; i < show; i++) {
+          const dot = document.createElement('div');
+          dot.className = 'cycle-dot' + (i < done ? ' done' : ' active');
+          cycleDotsEl.appendChild(dot);
+        }
+      } else {
+        // Default: today's total
+        const total = getTodayCount();
+        if (total === 0) { cycleDotsEl.innerHTML = ''; return; }
+        cycleDotsEl.innerHTML = '';
+        for (let i = 0; i < Math.min(total, 12); i++) {
+          const dot = document.createElement('div');
+          dot.className = 'cycle-dot done';
+          cycleDotsEl.appendChild(dot);
+        }
       }
-      if (!isRunning && total === 0) cycleDotsEl.innerHTML = '';
     }
 
     // ── Speech ───────────────────────────────────────────────
@@ -440,6 +472,9 @@
       completedCyclesThisRun = 0;
       startBtn.style.display = 'none';
       stopBtn.style.display = 'inline';
+      document.getElementById('sessionCycleLabel').style.display = 'block';
+      document.getElementById('sessionCycleCount').textContent = '0';
+      document.querySelector('.today-cycles').style.display = 'none';
       startPhase(0);
       updateTimerDisplay();
 
@@ -452,6 +487,7 @@
             // Completed a full cycle
             incrementTodayCount();
             completedCyclesThisRun++;
+            document.getElementById('sessionCycleCount').textContent = completedCyclesThisRun;
           }
           startPhase(next);
         }
@@ -466,6 +502,8 @@
       clearInterval(interval);
       startBtn.style.display = 'inline';
       stopBtn.style.display = 'none';
+      document.getElementById('sessionCycleLabel').style.display = 'none';
+      document.querySelector('.today-cycles').style.display = 'block';
       phaseLabelEl.textContent = '';
       timerEl.textContent = '--:--';
       timerEl.className = 'timer';
