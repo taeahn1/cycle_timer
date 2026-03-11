@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,6 +13,7 @@
       --connect-color: #60a5fa;
       --transform-color: #4ade80;
     }
+
     body {
       background-color: var(--bg-color);
       color: var(--font-color);
@@ -24,30 +26,52 @@
       margin: 0;
       padding: 1rem;
     }
+
     .container {
       text-align: center;
     }
+
     .phase-label {
       font-size: 3rem;
       font-weight: bold;
       margin-bottom: 2rem;
       animation: fadeIn 0.5s ease-in;
     }
-    .recall { color: var(--recall-color); }
-    .connect { color: var(--connect-color); }
-    .transform { color: var(--transform-color); }
-    
+
+    .recall {
+      color: var(--recall-color);
+    }
+
+    .connect {
+      color: var(--connect-color);
+    }
+
+    .transform {
+      color: var(--transform-color);
+    }
+
     .timer {
       font-size: 5rem;
       font-weight: bold;
       margin: 2rem 0;
       font-variant-numeric: tabular-nums;
     }
+
+    .page-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      opacity: 0.5;
+      margin-bottom: 1rem;
+    }
+
     .session-info {
       font-size: 1.5rem;
       margin-top: 2rem;
       opacity: 0.8;
     }
+
     .btn {
       padding: 1rem 2rem;
       border: none;
@@ -58,35 +82,58 @@
       transition: all 0.3s ease;
       color: white;
     }
-    .start-btn { 
-      background-color: var(--transform-color); 
+
+    .start-btn {
+      background-color: var(--transform-color);
     }
-    .start-btn:hover { 
-      background-color: #22c55e; 
+
+    .start-btn:hover {
+      background-color: #22c55e;
       transform: scale(1.05);
     }
-    .stop-btn { 
-      background-color: var(--recall-color); 
+
+    .stop-btn {
+      background-color: var(--recall-color);
     }
-    .stop-btn:hover { 
-      background-color: #dc2626; 
+
+    .stop-btn:hover {
+      background-color: #dc2626;
       transform: scale(1.05);
     }
+
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-20px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
+
     .pulse {
       animation: pulse 2s infinite;
     }
+
     @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.5;
+      }
     }
   </style>
 </head>
+
 <body>
   <div class="container">
+    <div class="page-title">Cycles</div>
     <div id="phaseLabel" class="phase-label"></div>
     <div id="timer" class="timer">--:--</div>
     <div id="sessionInfo" class="session-info"></div>
@@ -102,9 +149,9 @@
       { name: 'RECALL', duration: 120, color: 'recall' },   // 2 minutes
       { name: 'CONNECT', duration: 180, color: 'connect' }  // 3 minutes
     ];
-    
+
     const SESSION_DURATION = 300; // 5 minutes per cycle (2+3=5)
-    
+
     // State
     let currentPhaseIndex = 0;
     let timeRemaining = 0;
@@ -113,14 +160,14 @@
     let interval = null;
     let sessionStartTime = 0;
     let totalSessionTime = 0;
-    
+
     // DOM elements
     const phaseLabelEl = document.getElementById('phaseLabel');
     const timerEl = document.getElementById('timer');
     const sessionInfoEl = document.getElementById('sessionInfo');
     const startBtn = document.getElementById('startBtn');
     const stopBtn = document.getElementById('stopBtn');
-    
+
     // Speech synthesis
     function speak(text) {
       if ('speechSynthesis' in window) {
@@ -133,55 +180,55 @@
         speechSynthesis.speak(msg);
       }
     }
-    
+
     // Format time as MM:SS
     function formatTime(seconds) {
       const mins = Math.floor(seconds / 60);
       const secs = seconds % 60;
       return `${mins}:${String(secs).padStart(2, '0')}`;
     }
-    
+
     // Start a new phase
     function startPhase(phaseIndex) {
       currentPhaseIndex = phaseIndex;
       const phase = PHASES[phaseIndex];
-      
+
       timeRemaining = phase.duration;
-      
+
       // Update UI
       phaseLabelEl.textContent = phase.name;
       phaseLabelEl.className = `phase-label ${phase.color}`;
-      
+
       // Announce phase
       speak(phase.name);
     }
-    
+
     // Start the timer
     function startTimer() {
       if (isRunning) return;
-      
+
       isRunning = true;
       sessionStartTime = Date.now();
       sessionCount++;
-      
+
       // Start with first phase
       startPhase(0);
-      
+
       // Update UI
       startBtn.style.display = 'none';
       stopBtn.style.display = 'inline';
       updateDisplay();
-      
+
       // Start countdown
       interval = setInterval(() => {
         timeRemaining--;
         totalSessionTime++;
-        
+
         // Check if phase is complete
         if (timeRemaining <= 0) {
           // Move to next phase
           const nextPhaseIndex = (currentPhaseIndex + 1) % PHASES.length;
-          
+
           // If we completed all phases (back to phase 0), this session is done
           if (nextPhaseIndex === 0) {
             // Session complete, start new session automatically
@@ -191,32 +238,32 @@
             startPhase(nextPhaseIndex);
           }
         }
-        
+
         updateDisplay();
       }, 1000);
     }
-    
+
     // Stop the timer
     function stopTimer() {
       if (!isRunning) return;
-      
+
       isRunning = false;
       clearInterval(interval);
-      
+
       // Reset UI
       startBtn.style.display = 'inline';
       stopBtn.style.display = 'none';
-      
+
       // Reset state
       currentPhaseIndex = 0;
       timeRemaining = 0;
       totalSessionTime = 0;
-      
+
       phaseLabelEl.textContent = '';
       timerEl.textContent = '--:--';
       updateDisplay();
     }
-    
+
     // Update display
     function updateDisplay() {
       // Update timer
@@ -224,7 +271,7 @@
         timerEl.textContent = formatTime(timeRemaining);
         timerEl.className = timeRemaining <= 10 ? 'timer pulse' : 'timer';
       }
-      
+
       // Update session info
       if (isRunning) {
         const currentPhase = PHASES[currentPhaseIndex];
@@ -234,13 +281,14 @@
         sessionInfoEl.textContent = `Total Sessions: ${sessionCount}`;
       }
     }
-    
+
     // Event listeners
     startBtn.addEventListener('click', startTimer);
     stopBtn.addEventListener('click', stopTimer);
-    
+
     // Initialize display
     updateDisplay();
   </script>
 </body>
+
 </html>
