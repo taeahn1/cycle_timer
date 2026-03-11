@@ -8,10 +8,15 @@
   <style>
     :root {
       --bg-color: #0f172a;
+      --surface: #1e293b;
       --font-color: white;
       --recall-color: #f43f5e;
       --connect-color: #60a5fa;
-      --transform-color: #4ade80;
+      --muted: rgba(255, 255, 255, 0.4);
+    }
+
+    * {
+      box-sizing: border-box;
     }
 
     body {
@@ -29,12 +34,40 @@
 
     .container {
       text-align: center;
+      width: 100%;
+      max-width: 400px;
     }
 
+    /* Page title */
+    .page-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      opacity: 0.4;
+      margin-bottom: 2.5rem;
+    }
+
+    /* Today's cycle count */
+    .today-cycles {
+      font-size: 1rem;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.05em;
+    }
+
+    .today-cycles span {
+      color: white;
+      font-weight: 700;
+      font-size: 1.3rem;
+    }
+
+    /* Phase label */
     .phase-label {
       font-size: 3rem;
       font-weight: bold;
-      margin-bottom: 2rem;
+      margin: 1.5rem 0;
+      min-height: 3.5rem;
       animation: fadeIn 0.5s ease-in;
     }
 
@@ -46,45 +79,63 @@
       color: var(--connect-color);
     }
 
-    .transform {
-      color: var(--transform-color);
-    }
-
+    /* Timer */
     .timer {
-      font-size: 5rem;
+      font-size: 5.5rem;
       font-weight: bold;
-      margin: 2rem 0;
+      margin: 0.5rem 0 2rem;
       font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
     }
 
-    .page-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      opacity: 0.5;
-      margin-bottom: 1rem;
+    /* Cycle progress dots */
+    .cycle-dots {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 2rem;
+      min-height: 10px;
     }
 
-    .session-info {
-      font-size: 1.5rem;
-      margin-top: 2rem;
-      opacity: 0.8;
+    .cycle-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transition: background 0.3s;
+    }
+
+    .cycle-dot.done {
+      background: var(--connect-color);
+    }
+
+    .cycle-dot.active {
+      background: var(--recall-color);
+      animation: pulse 1.5s infinite;
+    }
+
+    /* Buttons */
+    .controls {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
     }
 
     .btn {
-      padding: 1rem 2rem;
+      padding: 0.85rem 1.8rem;
       border: none;
       border-radius: 9999px;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       cursor: pointer;
-      margin: 0.5rem;
-      transition: all 0.3s ease;
+      transition: all 0.25s ease;
       color: white;
+      font-weight: 600;
     }
 
     .start-btn {
-      background-color: var(--transform-color);
+      background-color: #4ade80;
     }
 
     .start-btn:hover {
@@ -101,10 +152,118 @@
       transform: scale(1.05);
     }
 
+    .history-btn {
+      background: transparent;
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
+      color: rgba(255, 255, 255, 0.6);
+      padding: 0.6rem 1.4rem;
+      font-size: 0.9rem;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 0.5rem;
+    }
+
+    .history-btn:hover {
+      border-color: rgba(255, 255, 255, 0.5);
+      color: white;
+    }
+
+    /* ── History Modal ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--surface);
+      border-radius: 1.5rem;
+      padding: 2rem;
+      width: 90%;
+      max-width: 380px;
+      max-height: 70vh;
+      overflow-y: auto;
+      animation: slideUp 0.3s ease;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0.7;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.4rem;
+      cursor: pointer;
+      opacity: 0.5;
+      transition: opacity 0.2s;
+      line-height: 1;
+    }
+
+    .modal-close:hover {
+      opacity: 1;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .history-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.7rem 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 0.75rem;
+    }
+
+    .history-date {
+      font-size: 0.95rem;
+      opacity: 0.7;
+    }
+
+    .history-count {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--connect-color);
+    }
+
+    .history-empty {
+      text-align: center;
+      opacity: 0.4;
+      padding: 2rem 0;
+      font-size: 0.95rem;
+    }
+
+    /* Animations */
     @keyframes fadeIn {
       from {
         opacity: 0;
-        transform: translateY(-20px);
+        transform: translateY(-12px);
       }
 
       to {
@@ -113,8 +272,16 @@
       }
     }
 
-    .pulse {
-      animation: pulse 2s infinite;
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     @keyframes pulse {
@@ -122,11 +289,17 @@
       0%,
       100% {
         opacity: 1;
+        transform: scale(1);
       }
 
       50% {
         opacity: 0.5;
+        transform: scale(0.85);
       }
+    }
+
+    .pulse {
+      animation: pulse 2s infinite;
     }
   </style>
 </head>
@@ -134,160 +307,217 @@
 <body>
   <div class="container">
     <div class="page-title">Cycles</div>
+
+    <!-- Today's count -->
+    <div class="today-cycles">오늘 <span id="todayCount">0</span> 사이클</div>
+
+    <!-- Phase label & Timer -->
     <div id="phaseLabel" class="phase-label"></div>
     <div id="timer" class="timer">--:--</div>
-    <div id="sessionInfo" class="session-info"></div>
-    <div id="controls">
+
+    <!-- Cycle progress dots (max 10 visible) -->
+    <div class="cycle-dots" id="cycleDots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
       <button id="startBtn" class="btn start-btn">▶ Start</button>
       <button id="stopBtn" class="btn stop-btn" style="display:none;">⏹ Stop</button>
+    </div>
+    <button class="history-btn" id="historyBtn">📅 History</button>
+  </div>
+
+  <!-- History Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">History</div>
+        <button class="modal-close" id="modalClose">✕</button>
+      </div>
+      <div class="history-list" id="historyList"></div>
     </div>
   </div>
 
   <script>
-    // Timer configuration
+    // ── Config ──────────────────────────────────────────────
     const PHASES = [
-      { name: 'RECALL', duration: 120, color: 'recall' },   // 2 minutes
-      { name: 'CONNECT', duration: 180, color: 'connect' }  // 3 minutes
+      { name: 'RECALL', duration: 120, color: 'recall' },
+      { name: 'CONNECT', duration: 180, color: 'connect' }
     ];
+    const STORAGE_KEY = 'cycle_timer_history';
 
-    const SESSION_DURATION = 300; // 5 minutes per cycle (2+3=5)
-
-    // State
+    // ── State ───────────────────────────────────────────────
     let currentPhaseIndex = 0;
     let timeRemaining = 0;
-    let sessionCount = 0;
     let isRunning = false;
     let interval = null;
-    let sessionStartTime = 0;
-    let totalSessionTime = 0;
+    let completedCyclesThisRun = 0;   // cycles completed since Start pressed
 
-    // DOM elements
+    // ── DOM ─────────────────────────────────────────────────
     const phaseLabelEl = document.getElementById('phaseLabel');
     const timerEl = document.getElementById('timer');
-    const sessionInfoEl = document.getElementById('sessionInfo');
     const startBtn = document.getElementById('startBtn');
     const stopBtn = document.getElementById('stopBtn');
+    const todayCountEl = document.getElementById('todayCount');
+    const cycleDotsEl = document.getElementById('cycleDots');
+    const historyBtn = document.getElementById('historyBtn');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalClose = document.getElementById('modalClose');
+    const historyListEl = document.getElementById('historyList');
 
-    // Speech synthesis
-    function speak(text) {
-      if ('speechSynthesis' in window) {
-        speechSynthesis.cancel();
-        const msg = new SpeechSynthesisUtterance(text);
-        msg.lang = 'en-US';
-        msg.pitch = 1;
-        msg.rate = 0.9;
-        msg.volume = 1;
-        speechSynthesis.speak(msg);
+    // ── Storage helpers ──────────────────────────────────────
+    function todayKey() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function loadHistory() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+      catch { return {}; }
+    }
+
+    function saveHistory(history) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+    }
+
+    function getTodayCount() {
+      return loadHistory()[todayKey()] || 0;
+    }
+
+    function incrementTodayCount() {
+      const history = loadHistory();
+      const key = todayKey();
+      history[key] = (history[key] || 0) + 1;
+      saveHistory(history);
+      refreshTodayCount();
+      refreshDots();
+    }
+
+    function refreshTodayCount() {
+      todayCountEl.textContent = getTodayCount();
+    }
+
+    // ── Dots (up to 10) ──────────────────────────────────────
+    function refreshDots() {
+      const total = getTodayCount();
+      const show = Math.min(total + 1, 12);   // show at least 1 (next) + done
+      cycleDotsEl.innerHTML = '';
+      for (let i = 0; i < show; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'cycle-dot' + (i < total ? ' done' : (isRunning ? ' active' : ''));
+        cycleDotsEl.appendChild(dot);
       }
+      if (!isRunning && total === 0) cycleDotsEl.innerHTML = '';
     }
 
-    // Format time as MM:SS
-    function formatTime(seconds) {
-      const mins = Math.floor(seconds / 60);
-      const secs = seconds % 60;
-      return `${mins}:${String(secs).padStart(2, '0')}`;
+    // ── Speech ───────────────────────────────────────────────
+    function speak(text) {
+      if (!('speechSynthesis' in window)) return;
+      speechSynthesis.cancel();
+      const msg = new SpeechSynthesisUtterance(text);
+      msg.lang = 'en-US'; msg.pitch = 1; msg.rate = 0.9; msg.volume = 1;
+      speechSynthesis.speak(msg);
     }
 
-    // Start a new phase
-    function startPhase(phaseIndex) {
-      currentPhaseIndex = phaseIndex;
-      const phase = PHASES[phaseIndex];
+    // ── Format ───────────────────────────────────────────────
+    function formatTime(s) {
+      return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+    }
 
+    // ── Phase / Timer ────────────────────────────────────────
+    function startPhase(index) {
+      currentPhaseIndex = index;
+      const phase = PHASES[index];
       timeRemaining = phase.duration;
-
-      // Update UI
       phaseLabelEl.textContent = phase.name;
       phaseLabelEl.className = `phase-label ${phase.color}`;
-
-      // Announce phase
       speak(phase.name);
+      refreshDots();
     }
 
-    // Start the timer
     function startTimer() {
       if (isRunning) return;
-
       isRunning = true;
-      sessionStartTime = Date.now();
-      sessionCount++;
-
-      // Start with first phase
-      startPhase(0);
-
-      // Update UI
+      completedCyclesThisRun = 0;
       startBtn.style.display = 'none';
       stopBtn.style.display = 'inline';
-      updateDisplay();
+      startPhase(0);
+      updateTimerDisplay();
 
-      // Start countdown
       interval = setInterval(() => {
         timeRemaining--;
-        totalSessionTime++;
 
-        // Check if phase is complete
         if (timeRemaining <= 0) {
-          // Move to next phase
-          const nextPhaseIndex = (currentPhaseIndex + 1) % PHASES.length;
-
-          // If we completed all phases (back to phase 0), this session is done
-          if (nextPhaseIndex === 0) {
-            // Session complete, start new session automatically
-            startPhase(0);
-          } else {
-            // Move to next phase in current session
-            startPhase(nextPhaseIndex);
+          const next = (currentPhaseIndex + 1) % PHASES.length;
+          if (next === 0) {
+            // Completed a full cycle
+            incrementTodayCount();
+            completedCyclesThisRun++;
           }
+          startPhase(next);
         }
 
-        updateDisplay();
+        updateTimerDisplay();
       }, 1000);
     }
 
-    // Stop the timer
     function stopTimer() {
       if (!isRunning) return;
-
       isRunning = false;
       clearInterval(interval);
-
-      // Reset UI
       startBtn.style.display = 'inline';
       stopBtn.style.display = 'none';
-
-      // Reset state
-      currentPhaseIndex = 0;
-      timeRemaining = 0;
-      totalSessionTime = 0;
-
       phaseLabelEl.textContent = '';
       timerEl.textContent = '--:--';
-      updateDisplay();
+      timerEl.className = 'timer';
+      refreshDots();
     }
 
-    // Update display
-    function updateDisplay() {
-      // Update timer
-      if (isRunning) {
-        timerEl.textContent = formatTime(timeRemaining);
-        timerEl.className = timeRemaining <= 10 ? 'timer pulse' : 'timer';
-      }
+    function updateTimerDisplay() {
+      timerEl.textContent = formatTime(timeRemaining);
+      timerEl.className = 'timer' + (timeRemaining <= 10 ? ' pulse' : '');
+    }
 
-      // Update session info
-      if (isRunning) {
-        const currentPhase = PHASES[currentPhaseIndex];
-        const cycleNumber = Math.floor(totalSessionTime / SESSION_DURATION) + 1;
-        sessionInfoEl.textContent = `Session ${sessionCount} • Cycle ${cycleNumber} • ${currentPhase.name}`;
+    function formatDateLabel(key) {
+      const [y, m, d] = key.split('-');
+      const date = new Date(y, m - 1, d);
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      return `${y}.${m}.${d} (${days[date.getDay()]})`;
+    }
+
+    // ── History Modal ────────────────────────────────────────
+    function openHistory() {
+      const history = loadHistory();
+      const today = todayKey();
+      // Sort descending, exclude today
+      const entries = Object.entries(history)
+        .filter(([k]) => k !== today)
+        .sort(([a], [b]) => b.localeCompare(a));
+
+      if (entries.length === 0) {
+        historyListEl.innerHTML = '<div class="history-empty">아직 기록이 없어요</div>';
       } else {
-        sessionInfoEl.textContent = `Total Sessions: ${sessionCount}`;
+        historyListEl.innerHTML = entries.map(([key, count]) => `
+          <div class="history-row">
+            <span class="history-date">${formatDateLabel(key)}</span>
+            <span class="history-count">${count} cycles</span>
+          </div>
+        `).join('');
       }
+      modalOverlay.classList.add('open');
     }
 
-    // Event listeners
+    historyBtn.addEventListener('click', openHistory);
+    modalClose.addEventListener('click', () => modalOverlay.classList.remove('open'));
+    modalOverlay.addEventListener('click', e => {
+      if (e.target === modalOverlay) modalOverlay.classList.remove('open');
+    });
+
     startBtn.addEventListener('click', startTimer);
     stopBtn.addEventListener('click', stopTimer);
 
-    // Initialize display
-    updateDisplay();
+    // ── Init ─────────────────────────────────────────────────
+    refreshTodayCount();
+    refreshDots();
   </script>
 </body>
 
