@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cycle Timer - Recall/Connect/Transform</title>
+  <title>Cycle Timer - Recall/Connect</title>
   <style>
     :root {
       --bg-color: #0f172a;
@@ -99,12 +99,11 @@
   <script>
     // Timer configuration
     const PHASES = [
-      { name: 'RECALL', duration: 120, color: 'recall' },      // 2 minutes
-      { name: 'CONNECT', duration: 180, color: 'connect' },    // 3 minutes
-      { name: 'TRANSFORM', duration: 300, color: 'transform' } // 5 minutes
+      { name: 'RECALL', duration: 120, color: 'recall' },   // 2 minutes
+      { name: 'CONNECT', duration: 180, color: 'connect' }  // 3 minutes
     ];
     
-    const SESSION_DURATION = 600; // 10 minutes total (2+3+5=10)
+    const SESSION_DURATION = 300; // 5 minutes per cycle (2+3=5)
     
     // State
     let currentPhaseIndex = 0;
