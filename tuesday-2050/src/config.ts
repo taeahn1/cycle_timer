@@ -25,7 +25,7 @@ export const FINALS: string[] = [
 ];
 
 // Set to true only once assets/music.mp3 (-> public/music.mp3) exists.
-export const HAS_MUSIC = false;
+export const HAS_MUSIC = true;
 
 /** Crossfade length between cuts 1..7 (1.5 seconds). */
 export const CROSSFADE = Math.round(1.5 * FPS); // 45
@@ -231,5 +231,5 @@ export const MUSIC_KEYS: number[] = [
   TOTAL_FRAMES,
 ];
 export const MUSIC_VOLS: number[] = [
-  0, 0.7, 0.7, 0.25, 0.05, 0.3, 0.62, 0.68, 0.8, 1.0, 0.58, 0.45, 0.0, 0.0,
+  0, 0.7, 0.7, 0.38, 0.22, 0.42, 0.62, 0.68, 0.8, 1.0, 0.6, 0.5, 0.0, 0.0,
 ];

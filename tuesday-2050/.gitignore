@@ -19,5 +19,6 @@ candidates/**/*.webp
 candidates/*.html
 candidates/contact_*.png
 
-# Music source; committed copy lives in public/ only if you choose to.
+# Music — do not commit (uploaded OST is copyrighted; keep it local only).
 assets/*.mp3
+public/music.mp3
