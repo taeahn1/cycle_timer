@@ -15,6 +15,9 @@ candidates/**/*.png
 candidates/**/*.jpg
 candidates/**/*.jpeg
 candidates/**/*.webp
+# Temp contact-sheet HTML (embeds base64 images).
+candidates/*.html
+candidates/contact_*.png
 
 # Music source; committed copy lives in public/ only if you choose to.
 assets/*.mp3
