@@ -12,9 +12,17 @@ export const WIDTH = 1920;
 export const HEIGHT = 1080;
 
 // After you pick the winning candidate for a cut, copy it to
-// public/finals/<id>.jpg (e.g. public/finals/cut1.jpg) and add its id here.
+// public/finals/<id>.png (e.g. public/finals/cut1.png) and add its id here.
 // Ids NOT listed here fall back to the generated placeholder card.
-export const FINALS: string[] = [];
+export const FINALS: string[] = [
+  "cut1",
+  "cut2",
+  "cut3",
+  "cut4",
+  "cut5",
+  "cut6",
+  "cut7",
+];
 
 // Set to true only once assets/music.mp3 (-> public/music.mp3) exists.
 export const HAS_MUSIC = false;

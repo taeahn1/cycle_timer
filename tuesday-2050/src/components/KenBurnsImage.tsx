@@ -13,7 +13,7 @@ export const KenBurnsImage: React.FC<{ cut: Cut; durationInFrames: number }> = (
   const frame = useCurrentFrame();
 
   const src = FINALS.includes(cut.id)
-    ? staticFile(`finals/${cut.id}.jpg`)
+    ? staticFile(`finals/${cut.id}.png`)
     : staticFile(`placeholders/${cut.id}.svg`);
 
   const progress = interpolate(frame, [0, durationInFrames], [0, 1], {
