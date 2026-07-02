@@ -22,8 +22,10 @@ const MODEL = "gemini-2.5-flash-image";
 const CANDIDATES_PER_CUT = 3;
 
 const IDENTITY =
-  "same person as the reference photos, aged 48: subtle gray at the temples, " +
-  "deeper smile lines, identical bone structure, tall frame (189cm).";
+  "the SAME person as the reference photos, but clearly aged to 48 years old " +
+  "(a middle-aged man, not young): distinct gray at the temples, deeper smile " +
+  "lines and forehead lines, slightly fuller face, identical bone structure, " +
+  "same eyes and glasses style, tall frame (189cm).";
 const REALISM =
   "photorealistic, shot on Sony A7III, 85mm f/1.4, natural skin texture, " +
   "cinematic color grading. Real photograph only — no illustration, no anime, " +
@@ -79,6 +81,7 @@ async function generateOne(prompt) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       contents: [{ role: "user", parts: [...refParts, { text: prompt }] }],
+      generationConfig: { imageConfig: { aspectRatio: "16:9" } },
     }),
   });
   if (!res.ok) {
