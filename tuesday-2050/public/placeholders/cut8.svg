@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#000000"/>
+      <stop offset="0.55" stop-color="#000000"/>
+      <stop offset="1" stop-color="#000000"/>
+    </linearGradient>
+    <radialGradient id="v" cx="0.5" cy="0.5" r="0.75">
+      <stop offset="0.55" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0.65"/>
+    </radialGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#g)"/>
+  <rect width="1920" height="1080" fill="url(#v)"/>
+  <text x="120" y="230" font-family="Arial, sans-serif" font-size="220" font-weight="800" fill="#ffffff" fill-opacity="0.10">08</text>
+  <text x="120" y="900" font-family="Arial, sans-serif" font-size="46" font-weight="700" fill="#ffffff" fill-opacity="0.92" letter-spacing="4">BLACK — TITLE CARD</text>
+  <text x="120" y="960" font-family="Arial, sans-serif" font-size="40" fill="#ffffff" fill-opacity="0.7">암전 + 자막</text>
+  <text x="120" y="1010" font-family="Arial, sans-serif" font-size="26" fill="#ffffff" fill-opacity="0.45">PLACEHOLDER — needs refs/ photos + GEMINI_API_KEY, then public/finals/cut8.jpg</text>
+</svg>
