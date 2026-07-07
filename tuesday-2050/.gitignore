@@ -1,0 +1,24 @@
+node_modules
+dist
+.DS_Store
+.env
+
+# Ignore the output video from Git but not videos you import into src/.
+out
+
+# Personal reference photos — never commit.
+refs/*
+!refs/README.md
+
+# Generated candidate images (large binaries) — keep folders, not contents.
+candidates/**/*.png
+candidates/**/*.jpg
+candidates/**/*.jpeg
+candidates/**/*.webp
+# Temp contact-sheet HTML (embeds base64 images).
+candidates/*.html
+candidates/contact_*.png
+
+# Music — do not commit (uploaded OST is copyrighted; keep it local only).
+assets/*.mp3
+public/music.mp3
